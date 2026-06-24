@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIA-Hass | Dashboard de Fertilización Inteligente para Aguacate</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #2d6a4f;
+            --primary-light: #40916c;
+            --primary-dark: #1b4332;
+            --accent: #70e000;
+            --accent-soft: rgba(112, 224, 0, 0.1);
+            --bg-base: #f4f7f5;
+            --bg-surface: #ffffff;
+            --text-main: #1d2d24;
+            --text-muted: #5e7164;
+            --border: #e2e8e4;
+            --shadow-sm: 0 2px 4px rgba(27, 67, 50, 0.04);
+            --shadow-md: 0 8px 16px rgba(27, 67, 50, 0.08);
+            --shadow-lg: 0 16px 32px rgba(27, 67, 50, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-display: 'Outfit', sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark mode variables */
+        [data-theme="dark"] {
+            --bg-base: #0f1612;
+            --bg-surface: #17221b;
+            --text-main: #f4f7f5;
+            --text-muted: #a3b899;
+            --border: #26382c;
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        /* Layout Grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+
+        .brand-icon {
+            background-color: var(--accent);
+            color: var(--primary-dark);
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            box-shadow: 0 0 20px rgba(112, 224, 0, 0.4);
+        }
+
+        .brand-text h1 {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text span {
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-item button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .nav-item button:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+        }
+
+        .nav-item.active button {
+            background-color: var(--primary-light);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Main Workspace Area */
+        main {
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .header-title h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* Quick Info Bar */
+        .info-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--primary-light);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .info-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-bar-divider {
+            width: 1px;
+            height: 16px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Content Sections */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards and Grid System */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--primary-light);
+        }
+
+        /* Widgets/Metrics */
+        .metric-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: var(--bg-base);
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.15);
+        }
+
+        /* Radio Toggle Card style */
+        .climate-toggle-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .climate-toggle {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .climate-toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .climate-box {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--bg-base);
+        }
+
+        .climate-toggle input:checked + .climate-box {
+            border-color: var(--primary);
+            background-color: var(--accent-soft);
+            color: var(--primary-dark);
+            box-shadow: 0 0 10px rgba(45, 106, 79, 0.1);
+        }
+
+        .climate-toggle input:checked + .climate-box i {
+            color: var(--primary);
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background-color: rgba(45, 106, 79, 0.1); color: var(--primary); }
+        .badge-warning { background-color: rgba(247, 127, 0, 0.1); color: #f77f00; }
+        .badge-danger { background-color: rgba(214, 40, 40, 0.1); color: #d62828; }
+        .badge-info { background-color: rgba(0, 150, 255, 0.1); color: #0077b6; }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(45, 106, 79, 0.04);
+            color: var(--primary-dark);
+            font-weight: 700;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(45, 106, 79, 0.01);
+        }
+
+        /* Custom Bullet Lists */
+        ul.custom-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        ul.custom-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        ul.custom-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: var(--primary-light);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        ul.custom-list li.warn::before {
+            content: "⚠";
+            color: #f77f00;
+        }
+
+        ul.custom-list li.info::before {
+            content: "ℹ";
+            color: #0077b6;
+        }
+
+        /* SVG Bar Chart Styling */
+        .chart-wrapper {
+            margin-top: 1.5rem;
+            position: relative;
+            height: 250px;
+        }
+
+        .bar-chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Accordion Style */
+        .accordion-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            background-color: var(--bg-surface);
+        }
+
+        .accordion-header {
+            background-color: rgba(45, 106, 79, 0.02);
+            padding: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-dark);
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover {
+            background-color: rgba(45, 106, 79, 0.05);
+        }
+
+        .accordion-body {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: none;
+            background-color: #ffffff;
+        }
+
+        .accordion-item.active .accordion-body {
+            display: block;
+        }
+
+        /* Dark-mode toggle button */
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+
+        .theme-btn:hover {
+            background-color: var(--border);
+        }
+
+        /* Print view overrides */
+        @media print {
+            .app-container {
+                display: block;
+            }
+            aside, .theme-btn, .no-print {
+                display: none !important;
+            }
+            main {
+                padding: 0;
+            }
+            .card {
+                border: 1px solid #000;
+                box-shadow: none;
+                break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            .tab-content {
+                display: block !important;
+            }
+            .accordion-body {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Sidebar -->
+        <aside>
+            <div>
+                <div class="brand">
+                    <div class="brand-icon">A</div>
+                    <div class="brand-text">
+                        <h1>SIA-Hass</h1>
+                        <span>Nutrición de Precisión</span>
+                    </div>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-tab="tab-dashboard">
+                        <button><i data-lucide="layout-dashboard"></i> Resumen General</button>
+                    </li>
+                    <li class="nav-item" data-tab="tab-edafoclimatico">
+                        <button><i data-lucide="cloud-rain"></i> Edafoclimático</button>
+                    </li>
+                    <li class="nav-item" data-tab="tab-fertilizacion">
+                        <button><i data-lucide="sprout"></i> Plan de Fertilización</button>
+                    </li>
+                    <li class="nav-item" data-tab="tab-produccion">
+                        <button><i data-lucide="trending-up"></i> Proyección 2026</button>
+                    </li>
+                    <li class="nav-item" data-tab="tab-clima">
+                        <button><i data-lucide="umbrella"></i> Clima Inteligente</button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>Ubicación: Vda. Pantalio</p>
+                <p>La Unión, Antioquia</p>
+                <p>Altitud: 2500 msnm</p>
+                <p style="margin-top: 0.5rem; opacity: 0.7;">© 2026 Agro-Inteligente</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- Header -->
+            <header>
+                <div class="header-title">
+                    <h2 id="tab-title">Resumen del Predio</h2>
+                    <p id="tab-subtitle">Diagnóstico inicial edafoclimático y generalidades del plan.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="info-bar">
+                        <div class="info-bar-item"><i data-lucide="map-pin" style="width: 16px;"></i> Pantalio, La Unión</div>
+                        <div class="info-bar-divider"></div>
+                        <div class="info-bar-item"><i data-lucide="mountain" style="width: 16px;"></i> 2500 msnm</div>
+                        <div class="info-bar-divider"></div>
+                        <div class="info-bar-item"><i data-lucide="calendar" style="width: 16px;"></i> Plan 2026</div>
+                    </div>
+                    <button class="theme-btn" id="theme-toggle" title="Cambiar Tema">
+                        <i data-lucide="moon" id="theme-icon"></i>
+                    </button>
+                    <button class="theme-btn no-print" onclick="window.print()" title="Imprimir Plan Completo">
+                        <i data-lucide="printer"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD GENERAL -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="metric-label">Ubicación y Suelo</span>
+                            <span class="badge badge-success">Andisoles</span>
+                        </div>
+                        <div class="metric-container">
+                            <span class="metric-value">5.2 pH</span>
+                            <span class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Suelos ácidos, alta retención hídrica, alta fijación de Fósforo y alto porcentaje de Materia Orgánica.</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="metric-label">Rendimiento Proyectado</span>
+                            <span class="badge badge-info">Cosecha 2026</span>
+                        </div>
+                        <div class="metric-container">
+                            <span class="metric-value" id="summary-yield">65.0 kg/árbol</span>
+                            <span class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Rendimiento unitario promedio basado en la edad seleccionada (6-8 años de edad) y manejo medio.</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="metric-label">Extracción Nutricional</span>
+                            <span class="badge badge-warning">Demanda Neta</span>
+                        </div>
+                        <div class="metric-container">
+                            <span class="metric-value" id="summary-npk" style="font-size: 1.5rem; line-height: 1.25;">N: 51 kg • K₂O: 76 kg</span>
+                            <span class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Remoción neta por hectárea estimando fósforo y elementos menores (Boro, Zinc) requeridos para la cosecha proyectada.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Configuración rápida de entrada -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="sliders"></i> Configuración del Cultivo</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="config-trees">Número de Árboles Totales</label>
+                            <input type="number" id="config-trees" class="form-input" value="300" min="1" oninput="recalculateAll()">
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 0; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="config-age">Edad Promedio (Años)</label>
+                                <select id="config-age" class="form-select" onchange="recalculateAll()">
+                                    <option value="1">1 - 2 (Desarrollo)</option>
+                                    <option value="3">3 - 4 (Inicio de producción)</option>
+                                    <option value="6" selected>5 - 8 (Plena producción)</option>
+                                    <option value="9">9+ (Madurez productiva)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="config-density">Árboles/Hectárea</label>
+                                <input type="number" id="config-density" class="form-input" value="277" min="50" max="600" oninput="recalculateAll()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Escenario Climático Actual (2026)</label>
+                            <div class="climate-toggle-group">
+                                <label class="climate-toggle">
+                                    <input type="radio" name="climate-scenario" value="normal" checked onchange="recalculateAll()">
+                                    <div class="climate-box">
+                                        <i data-lucide="cloud-sun"></i>
+                                        Normal (Bimodal)
+                                    </div>
+                                </label>
+                                <label class="climate-toggle">
+                                    <input type="radio" name="climate-scenario" value="nino" onchange="recalculateAll()">
+                                    <div class="climate-box">
+                                        <i data-lucide="sun"></i>
+                                        El Niño (Driest)
+                                    </div>
+                                </label>
+                                <label class="climate-toggle">
+                                    <input type="radio" name="climate-scenario" value="nina" onchange="recalculateAll()">
+                                    <div class="climate-box">
+                                        <i data-lucide="cloud-rain"></i>
+                                        La Niña (Wettest)
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del Balance de Nutrientes -->
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="activity"></i> Extracción Nutricional por Cosecha</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <svg class="bar-chart-svg" id="nutrient-chart" viewBox="0 0 400 220">
+                                <!-- Dynamic bars will go here via JavaScript -->
+                            </svg>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+                            Representación gráfica de la remoción (kg/Hectárea) en base al rendimiento proyectado de la cosecha 2026.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="alert-triangle"></i> Diagnóstico de Riesgos Edafoclimáticos (2500 msnm)</span>
+                    </div>
+                    <div class="grid-2" style="gap: 1.5rem;">
+                        <div>
+                            <h4 style="color: var(--primary-dark); margin-bottom: 0.75rem; font-size: 1rem;">Limitantes Clave del Suelo Andisol:</h4>
+                            <ul class="custom-list">
+                                <li class="warn"><strong>Fijación de Fósforo (P):</strong> Debido a la presencia de alófana, el fósforo se liga al Al y Fe. Requiere aportes localizados y fraccionados.</li>
+                                <li class="warn"><strong>Acidez y Aluminio:</strong> Un pH de 5.2 puede limitar la absorción de Ca, Mg y K. Es indispensable realizar enmiendas de encalado antes de las etapas de alta demanda.</li>
+                                <li class="info"><strong>Retención de Humedad:</strong> Su estructura porosa acumula agua de forma eficiente, pero un exceso de lluvia puede compactar y asfixiar raíces.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--primary-dark); margin-bottom: 0.75rem; font-size: 1rem;">Sensibilidad Climática (La Unión):</h4>
+                            <ul class="custom-list">
+                                <li class="warn"><strong>Bajas Temperaturas (10-18 °C):</strong> El metabolismo del árbol es más lento, haciendo que el llenado del fruto dure hasta 10-11 meses.</li>
+                                <li class="warn"><strong>Alta Nubosidad:</strong> Disminuye la tasa fotosintética y ralentiza la transpiración, afectando la absorción pasiva de Calcio y Boro hacia el fruto.</li>
+                                <li class="info"><strong>Lluvias Prolongadas:</strong> Promueven el lavado (lixiviación) de Nitrógeno y Potasio del suelo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: DETALLES EDAFOCLIMATICOS -->
+            <div id="tab-edafoclimatico" class="tab-content">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="compass"></i> Condiciones del Agroecosistema: Vereda Pantalio</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parámetro Edafoclimático</th>
+                                    <th>Valor local</th>
+                                    <th>Impacto en el Aguacate Hass</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Altitud</strong></td>
+                                    <td>2500 msnm</td>
+                                    <td>Ubicación en el límite altitudinal superior para Hass. Ciclos productivos muy largos (10-11 meses flor-cosecha). Calidad excelente de aceite y mayor materia seca.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Temperatura</strong></td>
+                                    <td>13 °C - 18 °C (promedio 16.5 °C)</td>
+                                    <td>Ritmo de crecimiento vegetativo moderado. Floración tardía e inducida por periodos fríos secos. Bajo riesgo de golpes de calor.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Precipitación</strong></td>
+                                    <td>2200 - 2500 mm / año (Bimodal)</td>
+                                    <td>Alta pluviosidad. Riesgo crítico de pudrición de raíz por <i>Phytophthora</i>. Requiere pendientes óptimas o camellones de siembra.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Suelo (Orden Andisol)</strong></td>
+                                    <td>Textura Franco-Arenosa a Franca, densidad aparente baja (&lt; 0.8 g/cm³)</td>
+                                    <td>Estructura esponjosa muy porosa. Alta retención de agua pero alta susceptibilidad a la fijación de fósforo (retención de fosfatos &gt; 85%).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>pH del Suelo</strong></td>
+                                    <td>5.0 - 5.5 (Ácido)</td>
+                                    <td>Alta solubilidad del Aluminio e Hierro. Requiere la aplicación de <strong>Cal Dolomita</strong> y cales fosfatadas para neutralizar acidez y aportar Calcio y Magnesio.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Materia Orgánica</strong></td>
+                                    <td>10% - 15% (Muy alto)</td>
+                                    <td>La baja temperatura ralentiza la descomposición. Aunque hay alta cantidad total de nitrógeno orgánico, su liberación (mineralización) es lenta.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="check-square"></i> Acciones Correctivas de Suelo Recomendadas</span>
+                        </div>
+                        <ul class="custom-list">
+                            <li><strong>Enmienda de Calcio y Magnesio:</strong> Aplicación de 1.5 a 2.5 kg de Cal Dolomita por árbol (según análisis de suelo) en el periodo de post-cosecha (Enero/Febrero) para subir pH y aportar Ca y Mg.</li>
+                            <li><strong>Localización del Fósforo:</strong> Colocar fertilizantes fosfatados en la zona activa de raíces (gotera del árbol) cubiertos con mulch o abonos orgánicos compostados para evitar el contacto directo con minerales fijadores del suelo.</li>
+                            <li><strong>Uso de Materia Orgánica Activa:</strong> Incorporar compost de alta calidad biológica para acelerar la mineralización e introducir micorrizas que ayuden a solubilizar el Fósforo fijado.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="droplet"></i> Monitoreo de Humedad y Drenaje</span>
+                        </div>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+                            En la vereda Pantalio, a 2500 msnm, el encharcamiento temporal destruye rápidamente los pelos absorbentes del aguacate, que posee un sistema radicular muy superficial y con poca tolerancia a la anoxia.
+                        </p>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);">
+                            Se recomienda la construcción de canales de desviación de aguas lluvias y zanjas de drenaje perimetrales, especialmente antes del inicio de las temporadas lluviosas de abril-mayo y octubre-noviembre.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: PLAN DE FERTILIZACION -->
+            <div id="tab-fertilizacion" class="tab-content">
+                <!-- Modificador Climático Alert -->
+                <div class="card" id="climate-alert-banner" style="background-color: var(--accent-soft); border-left: 5px solid var(--primary); margin-bottom: 2rem; padding: 1.25rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <i data-lucide="info" style="color: var(--primary); width: 24px; height: 24px; flex-shrink: 0;"></i>
+                        <div>
+                            <strong style="color: var(--primary-dark);">Plan Adaptativo Activo: Escenario <span id="current-climate-text">Normal</span></strong>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;" id="climate-impact-desc">
+                                Las dosis y frecuencias mostradas a continuación están ajustadas para el comportamiento bimodal típico del Oriente Antioqueño.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Anual 2026 -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="calendar-range"></i> Cronograma de Fertilización por Etapas Fenológicas (Año 2026)</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;" id="total-annual-fertilizer">Cálculos para 300 árboles</span>
+                    </div>
+
+                    <div class="accordion-container">
+                        <!-- Etapa 1 -->
+                        <div class="accordion-item active">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Etapa 1: Post-Cosecha y Acondicionamiento (Enero - Febrero 2026)</span>
+                                <i data-lucide="chevron-down"></i>
+                            </div>
+                            <div class="accordion-body">
+                                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div>
+                                        <p style="margin-bottom: 1rem;"><strong>Objetivo:</strong> Recuperar las reservas del árbol agotadas por la cosecha anterior, promover el desarrollo de nuevas raíces y regular el pH del suelo mediante el encalado antes de las lluvias.</p>
+                                        <ul class="custom-list">
+                                            <li><strong>Frecuencia:</strong> Una aplicación al inicio del periodo.</li>
+                                            <li><strong>Método de aplicación:</strong> Incorporado superficialmente en corona (zona de gotera del árbol) libre de malezas.</li>
+                                            <li><strong>Productos recomendados:</strong> Cal Dolomita (corrección) + Materia orgánica compostada.</li>
+                                        </ul>
+                                    </div>
+                                    <div style="background-color: var(--bg-base); padding: 1.25rem; border-radius: var(--radius-sm);">
+                                        <h5 style="color: var(--primary-dark); margin-bottom: 0.5rem; font-size: 0.95rem;">Dosis Calculadas (Por Árbol):</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div>• <strong>Cal Dolomita:</strong> <span id="e1-d1">2.0 kg</span>/árbol</div>
+                                            <div>• <strong>Compost Orgánico:</strong> <span id="e1-d2">8.0 kg</span>/árbol</div>
+                                            <div>• <strong>YaraMila Hydrocomplex:</strong> <span id="e1-d3">0.3 kg</span>/árbol</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Etapa 2 -->
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Etapa 2: Pre-Floración y Floración (Marzo - Abril 2026)</span>
+                                <i data-lucide="chevron-down"></i>
+                            </div>
+                            <div class="accordion-body">
+                                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div>
+                                        <p style="margin-bottom: 1rem;"><strong>Objetivo:</strong> Suministrar elementos críticos para la inducción y viabilidad de las flores (Fósforo, Boro y Zinc). El Fósforo aporta la energía necesaria (ATP) para la brotación floral.</p>
+                                        <ul class="custom-list">
+                                            <li><strong>Frecuencia:</strong> 1 aplicación edáfica al inicio de la etapa + 2 aplicaciones foliares espaciadas cada 20 días.</li>
+                                            <li><strong>Método de aplicación:</strong> Edáfica esparcida homogéneamente bajo la gotera; foliar dirigida a follaje nuevo con atomizador de alta presión.</li>
+                                            <li><strong>Productos recomendados:</strong> YaraMila Hydrocomplex (edáfico), YaraVita Frutrel / Cabtrac (foliar).</li>
+                                        </ul>
+                                    </div>
+                                    <div style="background-color: var(--bg-base); padding: 1.25rem; border-radius: var(--radius-sm);">
+                                        <h5 style="color: var(--primary-dark); margin-bottom: 0.5rem; font-size: 0.95rem;">Dosis Calculadas:</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div>• <strong>YaraMila Hydrocomplex (Edáfico):</strong> <span id="e2-d1">0.4 kg</span>/árbol</div>
+                                            <div>• <strong>YaraVita Frutrel (Foliar):</strong> <span id="e2-d2">3.0 mL</span>/litro de agua</div>
+                                            <div>• <strong>YaraVita Cabtrac (Foliar - Boro/Calcio):</strong> <span id="e2-d3">2.0 mL</span>/litro de agua</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Etapa 3 -->
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Etapa 3: Cuajado y Desarrollo Temprano del Fruto (Mayo - Junio 2026)</span>
+                                <i data-lucide="chevron-down"></i>
+                            </div>
+                            <div class="accordion-body">
+                                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div>
+                                        <p style="margin-bottom: 1rem;"><strong>Objetivo:</strong> Promover una alta división celular en el fruto recién cuajado y evitar la caída fisiológica. El Calcio es el nutriente estructural primario en este momento.</p>
+                                        <ul class="custom-list">
+                                            <li><strong>Frecuencia:</strong> 2 aplicaciones edáficas fraccionadas (1 por mes).</li>
+                                            <li><strong>Método de aplicación:</strong> Aplicación edáfica en corona.</li>
+                                            <li><strong>Productos recomendados:</strong> YaraLiva Nitrabor (Calcio activo y Nitrato de rápida absorción).</li>
+                                        </ul>
+                                    </div>
+                                    <div style="background-color: var(--bg-base); padding: 1.25rem; border-radius: var(--radius-sm);">
+                                        <h5 style="color: var(--primary-dark); margin-bottom: 0.5rem; font-size: 0.95rem;">Dosis Calculadas (Por Árbol):</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div>• <strong>YaraLiva Nitrabor:</strong> <span id="e3-d1">0.5 kg</span>/árbol (dividido en 2 aplicaciones de 0.25 kg)</div>
+                                            <div>• <strong>YaraVita Cabtrac (Foliar):</strong> <span id="e3-d2">2.0 mL</span>/litro de agua</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Etapa 4 -->
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Etapa 4: Crecimiento y Llenado Rápido del Fruto (Julio - Septiembre 2026)</span>
+                                <i data-lucide="chevron-down"></i>
+                            </div>
+                            <div class="accordion-body">
+                                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div>
+                                        <p style="margin-bottom: 1rem;"><strong>Objetivo:</strong> Fase de máxima acumulación de grasas y materia seca. Elevada demanda de Potasio para el calibre y transporte de azúcares, y Nitrógeno para sostener follaje fotosintético.</p>
+                                        <ul class="custom-list">
+                                            <li><strong>Frecuencia:</strong> 3 aplicaciones mensuales (Julio, Agosto, Septiembre).</li>
+                                            <li><strong>Método de aplicación:</strong> Edáfica esparcida homogéneamente en proyección de copa húmeda.</li>
+                                            <li><strong>Productos recomendados:</strong> YaraMila Hydrocomplex (Equilibrado con K) + Sulfato de Potasio.</li>
+                                        </ul>
+                                    </div>
+                                    <div style="background-color: var(--bg-base); padding: 1.25rem; border-radius: var(--radius-sm);">
+                                        <h5 style="color: var(--primary-dark); margin-bottom: 0.5rem; font-size: 0.95rem;">Dosis Calculadas (Por Árbol):</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div>• <strong>YaraMila Hydrocomplex:</strong> <span id="e4-d1">0.6 kg</span>/árbol (en 3 aplicaciones de 0.2 kg)</div>
+                                            <div>• <strong>Sulfato de Potasio ($K_2SO_4$):</strong> <span id="e4-d2">0.3 kg</span>/árbol</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Etapa 5 -->
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>Etapa 5: Maduración y Cosecha (Octubre - Diciembre 2026)</span>
+                                <i data-lucide="chevron-down"></i>
+                            </div>
+                            <div class="accordion-body">
+                                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div>
+                                        <p style="margin-bottom: 1rem;"><strong>Objetivo:</strong> Preparación final para cosecha principal. Mantener balance osmótico y firmeza de piel del fruto. Evitar exceso de Nitrógeno edáfico tardío que disminuye la vida de anaquel.</p>
+                                        <ul class="custom-list">
+                                            <li><strong>Frecuencia:</strong> Una aplicación edáfica al inicio de la etapa (Octubre).</li>
+                                            <li><strong>Método de aplicación:</strong> Edáfica en proyección de copa húmeda.</li>
+                                            <li><strong>Productos recomendados:</strong> YaraLiva Nitrabor (firmeza del fruto).</li>
+                                        </ul>
+                                    </div>
+                                    <div style="background-color: var(--bg-base); padding: 1.25rem; border-radius: var(--radius-sm);">
+                                        <h5 style="color: var(--primary-dark); margin-bottom: 0.5rem; font-size: 0.95rem;">Dosis Calculadas (Por Árbol):</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                                            <div>• <strong>YaraLiva Nitrabor:</strong> <span id="e5-d1">0.3 kg</span>/árbol</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Resumen de Compra de Productos -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="shopping-cart"></i> Estimación de Insumos para Compra (Año 2026)</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto Comercial</th>
+                                    <th>Dosis Anual/Árbol</th>
+                                    <th>Cantidad Total Requerida</th>
+                                    <th>Presentación Recomendada</th>
+                                    <th>Número de Sacos (50 kg)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Cal Dolomita</strong></td>
+                                    <td><span id="buy-dolomite-tree">2.0 kg</span></td>
+                                    <td><span id="buy-dolomite-total">600 kg</span></td>
+                                    <td>Saco de 50 kg</td>
+                                    <td><span id="buy-dolomite-bags">12 sacos</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Materia Orgánica (Compost)</strong></td>
+                                    <td><span id="buy-organic-tree">8.0 kg</span></td>
+                                    <td><span id="buy-organic-total">2400 kg</span></td>
+                                    <td>Bulto de 40 kg</td>
+                                    <td><span id="buy-organic-bags">60 bultos</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>YaraMila Hydrocomplex</strong></td>
+                                    <td><span id="buy-yaramila-tree">1.3 kg</span></td>
+                                    <td><span id="buy-yaramila-total">390 kg</span></td>
+                                    <td>Saco de 50 kg</td>
+                                    <td><span id="buy-yaramila-bags">8 sacos</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>YaraLiva Nitrabor</strong></td>
+                                    <td><span id="buy-nitrabor-tree">0.8 kg</span></td>
+                                    <td><span id="buy-nitrabor-total">240 kg</span></td>
+                                    <td>Saco de 50 kg</td>
+                                    <td><span id="buy-nitrabor-bags">5 sacos</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sulfato de Potasio</strong></td>
+                                    <td><span id="buy-sop-tree">0.3 kg</span></td>
+                                    <td><span id="buy-sop-total">90 kg</span></td>
+                                    <td>Saco de 50 kg</td>
+                                    <td><span id="buy-sop-bags">2 sacos</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: PROYECCION DE PRODUCCION -->
+            <div id="tab-produccion" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="sliders"></i> Parámetros de la Proyección de Cosecha (2026)</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="prod-tech">Nivel Tecnológico y Manejo Agronómico</label>
+                            <select id="prod-tech" class="form-select" onchange="recalculateAll()">
+                                <option value="alto">Alto (Nutrición de precisión, control fitosanitario riguroso)</option>
+                                <option value="medio" selected>Medio (Manejo tradicional con fertilización regular)</option>
+                                <option value="bajo">Bajo (Baja asistencia técnica y control fitosanitario)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="prod-loss">Porcentaje Estimado de Pérdidas (%)</label>
+                            <input type="number" id="prod-loss" class="form-input" value="10" min="0" max="100" oninput="recalculateAll()">
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Pérdidas fisiológicas, por plagas (monalonion, trips) o problemas fitosanitarios.
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="prod-price">Precio Estimado de Venta (COP / kg)</label>
+                            <input type="number" id="prod-price" class="form-input" value="6500" min="1000" step="500" oninput="recalculateAll()">
+                        </div>
+                    </div>
+
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="card-header">
+                            <span class="card-title"><i data-lucide="calculator"></i> Resultados Estimados de Producción</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                                <span style="font-weight: 500;">Producción Nominal por Árbol:</span>
+                                <strong id="res-nominal-tree" style="color: var(--primary-dark);">65.0 kg</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                                <span style="font-weight: 500;">Producción Neta (Descontando Pérdidas):</span>
+                                <strong id="res-net-tree" style="color: var(--primary-light);">58.5 kg/árbol</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                                <span style="font-weight: 500;">Producción Total del Predio (300 árboles):</span>
+                                <strong id="res-total-predio" style="color: var(--primary-dark);">17.55 Toneladas</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                                <span style="font-weight: 500;">Rendimiento Proyectado por Hectárea:</span>
+                                <strong id="res-yield-ha" style="color: var(--text-main);">16.20 t/ha</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; background-color: var(--accent-soft); padding: 0.75rem; border-radius: var(--radius-sm);">
+                                <span style="font-weight: 700; color: var(--primary-dark);">Ingresos Brutos Proyectados:</span>
+                                <strong id="res-income" style="color: var(--primary-dark); font-size: 1.1rem;">$114,075,000 COP</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="info"></i> Nota sobre Curva de Rendimiento en La Unión (2500 msnm)</span>
+                    </div>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1rem;">
+                        Los árboles de aguacate Hass en altitudes de 2500 msnm inician producción comercial más lentamente en comparación con altitudes templadas (1800 msnm), pero alcanzan una longevidad productiva mayor y frutos con contenidos superiores de materia seca (que supera frecuentemente el 23-24%).
+                    </p>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);">
+                        La proyección de producción asume que no ocurren heladas extremas o granizadas atípicas, que son riesgos potenciales en la vereda Pantalio. El manejo de la fertilización foliar de pre-floración con zinc y boro es crucial en esta zona para asegurar la polinización y retención de fruta bajo condiciones de frío y nubosidad.
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB 5: CLIMA INTELIGENTE -->
+            <div id="tab-clima" class="tab-content">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="shield-alert"></i> Estrategias de Manejo Agronómico Inteligente ante Cambio Climático</span>
+                    </div>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 1.5rem;">
+                        Las variaciones de temperatura y distribución de lluvias a causa del cambio climático (frecuencia de eventos severos de El Niño y La Niña) obligan a replantear el método y dosis de fertilización. A continuación se detallan las pautas técnicas basadas en agricultura climáticamente inteligente:
+                    </p>
+
+                    <div class="grid-2" style="gap: 2rem;">
+                        <div>
+                            <h4 style="color: #d62828; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem;">
+                                <i data-lucide="sun"></i> Escenario El Niño (Sequía)
+                            </h4>
+                            <ul class="custom-list">
+                                <li class="warn"><strong>Estrés Hídrico y Nutricional:</strong> Al disminuir el agua en el suelo, se detiene el flujo transpiratorio de la planta, bloqueando la absorción pasiva de Calcio y Boro hacia los frutos en crecimiento.</li>
+                                <li class="warn"><strong>Riesgo de Quemaduras de Raíz:</strong> La aplicación de fertilizantes químicos altamente salinos (ej. cloruro de potasio, urea) en suelo seco puede provocar plasmólisis y quemar las raíces.</li>
+                                <li class="info"><strong>Acción Recomendada:</strong> Priorizar la fertilización foliar con Calcio y Boro (YaraVita Cabtrac) para contrarrestar la baja movilidad en el suelo. Mantener el mulching (cobertura vegetal) y aplicar fertilización edáfica solo si existe humedad suficiente en el suelo.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 style="color: #0077b6; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem;">
+                                <i data-lucide="cloud-rain"></i> Escenario La Niña (Lluvias Intensas)
+                            </h4>
+                            <ul class="custom-list">
+                                <li class="warn"><strong>Pérdida por Lixiviación (Lavado):</strong> El exceso de agua lava rápidamente el Nitrógeno (en forma de nitrato) y el Potasio del suelo, dejándolos fuera del alcance de las raíces.</li>
+                                <li class="warn"><strong>Asfixia Radicular y Phytophthora:</strong> Los suelos Andisoles saturados pierden oxígeno. Las raíces se debilitan y son presa fácil del hongo causante de la marchitez del aguacate.</li>
+                                <li class="info"><strong>Acción Recomendada:</strong> Fraccionar las dosis anuales en más aplicaciones (ej. mensuales en vez de bimestrales) reduciendo la dosis por aplicación para minimizar lixiviación. Evitar fuentes muy acidificantes y preferir fertilizantes que aporten calcio al suelo para estabilizar la estructura.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i data-lucide="heart-pulse"></i> Indicadores de Monitoreo de Alerta Temprana</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Indicador</th>
+                                    <th>Herramienta / Método</th>
+                                    <th>Frecuencia Recomendada</th>
+                                    <th>Acción Umbral</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Humedad del Suelo</strong></td>
+                                    <td>Tensiómetros o Sensores de humedad a 30 y 60 cm de profundidad.</td>
+                                    <td>Semanal</td>
+                                    <td>Si la tensión supera 35 cbar, suspender fertilización edáfica o activar riego.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>pH de la rizosfera</strong></td>
+                                    <td>Medidor portátil de pH (relación 1:2 suelo:agua).</td>
+                                    <td>Trimestral</td>
+                                    <td>pH por debajo de 4.8: Aplicar Cal Dolomita o Yeso Agrícola de forma inmediata.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sanidad Radicular</strong></td>
+                                    <td>Muestreo e inspección visual de raicillas activas (deben ser de color crema/blanco).</td>
+                                    <td>Mensual</td>
+                                    <td>Si más del 30% de raíces están oscuras/necróticas, aplicar fungicidas específicos para Phytophthora y suspender fertilización nitrogenada edáfica fuerte.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript para Interactividad y Cálculos Agronómicos -->
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // Manejo del cambio de Tabs
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabTitle = document.getElementById('tab-title');
+        const tabSubtitle = document.getElementById('tab-subtitle');
+
+        const tabMetadata = {
+            'tab-dashboard': {
+                title: 'Resumen del Predio',
+                subtitle: 'Diagnóstico inicial edafoclimático y generalidades del plan.'
+            },
+            'tab-edafoclimatico': {
+                title: 'Condiciones Edafoclimáticas',
+                subtitle: 'Detalle de las variables de suelo y clima de la vereda Pantalio, La Unión.'
+            },
+            'tab-fertilizacion': {
+                title: 'Plan de Fertilización 2026',
+                subtitle: 'Dosis, frecuencias y productos comerciales recomendados por etapa fenológica.'
+            },
+            'tab-produccion': {
+                title: 'Proyecciones de Rendimiento',
+                subtitle: 'Simulación de cosecha, ingresos económicos y extracción de nutrientes.'
+            },
+            'tab-clima': {
+                title: 'Adaptación al Cambio Climático',
+                subtitle: 'Estrategias agronómicas inteligentes y alertas tempranas para el cultivo.'
+            }
+        };
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                item.classList.add('active');
+                const tabId = item.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+
+                // Actualizar títulos
+                tabTitle.textContent = tabMetadata[tabId].title;
+                tabSubtitle.textContent = tabMetadata[tabId].subtitle;
+            });
+        });
+
+        // Manejo del Acordeón en el Plan de Fertilización
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const isOpen = item.classList.contains('active');
+            
+            // Cerrar todos los acordeones
+            const allItems = document.querySelectorAll('.accordion-item');
+            allItems.forEach(i => i.classList.remove('active'));
+            
+            // Si no estaba abierto, abrirlo
+            if (!isOpen) {
+                item.classList.add('active');
+            }
+        }
+
+        // Lógica de cálculo agronómico interactivo
+        function recalculateAll() {
+            // Obtener entradas
+            const numTrees = parseInt(document.getElementById('config-trees').value) || 0;
+            const ageGroup = parseInt(document.getElementById('config-age').value) || 6;
+            const density = parseInt(document.getElementById('config-density').value) || 277;
+            const climateScenario = document.querySelector('input[name="climate-scenario"]:checked').value;
+
+            const techLevel = document.getElementById('prod-tech').value;
+            const losses = parseFloat(document.getElementById('prod-loss').value) || 0;
+            const pricePerKg = parseFloat(document.getElementById('prod-price').value) || 0;
+
+            // 1. Determinar el rendimiento nominal por árbol según la edad
+            let yieldPerTreeNominal = 0;
+            switch(ageGroup) {
+                case 1:
+                    yieldPerTreeNominal = 5.0; // Árbol joven en desarrollo inicial
+                    break;
+                case 3:
+                    yieldPerTreeNominal = 25.0; // Árbol en inicio de producción
+                    break;
+                case 6:
+                    yieldPerTreeNominal = 65.0; // Árbol en plena producción
+                    break;
+                case 9:
+                    yieldPerTreeNominal = 100.0; // Árbol maduro con alto rendimiento
+                    break;
+            }
+
+            // Ajuste por nivel de tecnología
+            let techMultiplier = 1.0;
+            if (techLevel === 'alto') techMultiplier = 1.25;
+            if (techLevel === 'bajo') techMultiplier = 0.7;
+
+            yieldPerTreeNominal = yieldPerTreeNominal * techMultiplier;
+
+            // Calcular rendimiento neto descontando pérdidas
+            const yieldPerTreeNet = yieldPerTreeNominal * (1 - (losses / 100));
+            const totalYieldKg = yieldPerTreeNet * numTrees;
+            const totalYieldTons = totalYieldKg / 1000;
+            const yieldPerHa = (yieldPerTreeNet * density) / 1000;
+
+            // Calcular ingresos brutos
+            const grossIncome = totalYieldKg * pricePerKg;
+
+            // Actualizar interfaz de producción
+            document.getElementById('summary-yield').textContent = `${yieldPerTreeNominal.toFixed(1)} kg/árbol`;
+            document.getElementById('res-nominal-tree').textContent = `${yieldPerTreeNominal.toFixed(1)} kg`;
+            document.getElementById('res-net-tree').textContent = `${yieldPerTreeNet.toFixed(1)} kg/árbol`;
+            document.getElementById('res-total-predio').textContent = `${totalYieldTons.toFixed(2)} Toneladas`;
+            document.getElementById('res-yield-ha').textContent = `${yieldPerHa.toFixed(2)} t/ha`;
+            document.getElementById('res-income').textContent = `$${grossIncome.toLocaleString('es-CO')} COP`;
+
+            // 2. Modificaciones de dosis de fertilización según el escenario climático
+            let multiplierN = 1.0;
+            let multiplierK = 1.0;
+            let multiplierCaB = 1.0;
+            let frequencyText = '';
+            let alertClass = 'badge-success';
+
+            const climateBanner = document.getElementById('climate-alert-banner');
+            const climateText = document.getElementById('current-climate-text');
+            const climateImpactDesc = document.getElementById('climate-impact-desc');
+
+            if (climateScenario === 'nina') {
+                multiplierN = 1.2; // Aumentar dosis por pérdidas por lixiviación
+                multiplierK = 1.15;
+                multiplierCaB = 1.0;
+                climateText.textContent = 'La Niña (Lluvias intensas)';
+                climateImpactDesc.textContent = 'Lluvias abundantes: Se incrementaron las dosis de Nitrógeno y Potasio edáfico en un 15-20% para compensar las pérdidas por lixiviación. Se recomienda fraccionar la fertilización en dosis mensuales más pequeñas.';
+                climateBanner.style.backgroundColor = 'rgba(0, 119, 182, 0.1)';
+                climateBanner.style.borderLeftColor = '#0077b6';
+            } else if (climateScenario === 'nino') {
+                multiplierN = 0.85; // Disminuir edáficos para evitar quemaduras por sales
+                multiplierK = 0.9;
+                multiplierCaB = 1.3; // Aumentar foliares porque el flujo transpiratorio de Ca y B baja
+                climateText.textContent = 'El Niño (Sequía prolongada)';
+                climateImpactDesc.textContent = 'Sequía severa: Se redujo la fertilización nitrogenada edáfica para evitar toxicidad por sales. Se incrementó la fertilización foliar con Calcio y Boro (YaraVita) en un 30% debido a la baja absorción del suelo seco.';
+                climateBanner.style.backgroundColor = 'rgba(247, 127, 0, 0.1)';
+                climateBanner.style.borderLeftColor = '#f77f00';
+            } else {
+                climateText.textContent = 'Normal';
+                climateImpactDesc.textContent = 'Comportamiento bimodal típico del Oriente Antioqueño. Fertilización edáfica concentrada en etapas claves de humedad del suelo.';
+                climateBanner.style.backgroundColor = 'var(--accent-soft)';
+                climateBanner.style.borderLeftColor = 'var(--primary)';
+            }
+
+            // Dosis base para un árbol adulto (en plena producción)
+            // Ajustar dosis base según edad
+            let ageFactor = 1.0;
+            if (ageGroup === 1) ageFactor = 0.25;
+            if (ageGroup === 3) ageFactor = 0.6;
+            if (ageGroup === 6) ageFactor = 1.0;
+            if (ageGroup === 9) ageFactor = 1.3;
+
+            // Etapas de fertilización (Dosis base por árbol multiplicados por factores de edad y clima)
+            const e1_dolomite = 2.0 * ageFactor; 
+            const e1_compost = 8.0 * ageFactor;
+            const e1_yaramila = 0.3 * ageFactor * multiplierN;
+
+            const e2_yaramila = 0.4 * ageFactor * multiplierN;
+            const e2_frutrel = 3.0 * (climateScenario === 'nino' ? 1.25 : 1.0); // mL/L
+            const e2_cabtrac = 2.0 * multiplierCaB; // mL/L
+
+            const e3_nitrabor = 0.5 * ageFactor * multiplierN * (climateScenario === 'nino' ? 0.8 : 1.1);
+            const e3_cabtrac = 2.0 * multiplierCaB;
+
+            const e4_yaramila = 0.6 * ageFactor * multiplierN;
+            const e4_sop = 0.3 * ageFactor * multiplierK;
+
+            const e5_nitrabor = 0.3 * ageFactor * (climateScenario === 'nina' ? 1.15 : 1.0);
+
+            // Actualizar interfaz del Plan
+            document.getElementById('total-annual-fertilizer').textContent = `Cálculos dinámicos para ${numTrees} árboles en base a las condiciones seleccionadas.`;
+            
+            document.getElementById('e1-d1').textContent = `${e1_dolomite.toFixed(2)} kg`;
+            document.getElementById('e1-d2').textContent = `${e1_compost.toFixed(2)} kg`;
+            document.getElementById('e1-d3').textContent = `${e1_yaramila.toFixed(2)} kg`;
+
+            document.getElementById('e2-d1').textContent = `${e2_yaramila.toFixed(2)} kg`;
+            document.getElementById('e2-d2').textContent = `${e2_frutrel.toFixed(1)} mL`;
+            document.getElementById('e2-d3').textContent = `${e2_cabtrac.toFixed(1)} mL`;
+
+            document.getElementById('e3-d1').textContent = `${e3_nitrabor.toFixed(2)} kg`;
+            document.getElementById('e3-d2').textContent = `${e3_cabtrac.toFixed(1)} mL`;
+
+            document.getElementById('e4-d1').textContent = `${e4_yaramila.toFixed(2)} kg`;
+            document.getElementById('e4-d2').textContent = `${e4_sop.toFixed(2)} kg`;
+
+            document.getElementById('e5-d1').textContent = `${e5_nitrabor.toFixed(2)} kg`;
+
+            // 3. Totales anuales de compra
+            const totalDolomite = e1_dolomite * numTrees;
+            const totalOrganic = e1_compost * numTrees;
+            const totalYaraMila = (e1_yaramila + e2_yaramila + e4_yaramila) * numTrees;
+            const totalNitrabor = (e3_nitrabor + e5_nitrabor) * numTrees;
+            const totalSOP = e4_sop * numTrees;
+
+            document.getElementById('buy-dolomite-tree').textContent = `${e1_dolomite.toFixed(2)} kg`;
+            document.getElementById('buy-dolomite-total').textContent = `${totalDolomite.toFixed(0)} kg`;
+            document.getElementById('buy-dolomite-bags').textContent = `${Math.ceil(totalDolomite / 50)} sacos`;
+
+            document.getElementById('buy-organic-tree').textContent = `${e1_compost.toFixed(2)} kg`;
+            document.getElementById('buy-organic-total').textContent = `${totalOrganic.toFixed(0)} kg`;
+            document.getElementById('buy-organic-bags').textContent = `${Math.ceil(totalOrganic / 40)} bultos`;
+
+            document.getElementById('buy-yaramila-tree').textContent = `${(e1_yaramila + e2_yaramila + e4_yaramila).toFixed(2)} kg`;
+            document.getElementById('buy-yaramila-total').textContent = `${totalYaraMila.toFixed(0)} kg`;
+            document.getElementById('buy-yaramila-bags').textContent = `${Math.ceil(totalYaraMila / 50)} sacos`;
+
+            document.getElementById('buy-nitrabor-tree').textContent = `${(e3_nitrabor + e5_nitrabor).toFixed(2)} kg`;
+            document.getElementById('buy-nitrabor-total').textContent = `${totalNitrabor.toFixed(0)} kg`;
+            document.getElementById('buy-nitrabor-bags').textContent = `${Math.ceil(totalNitrabor / 50)} sacos`;
+
+            document.getElementById('buy-sop-tree').textContent = `${e4_sop.toFixed(2)} kg`;
+            document.getElementById('buy-sop-total').textContent = `${totalSOP.toFixed(0)} kg`;
+            document.getElementById('buy-sop-bags').textContent = `${Math.ceil(totalSOP / 50)} sacos`;
+
+            // 4. Extracción de Nutrientes en base al Rendimiento Neto por Hectárea
+            const yieldHaVal = yieldPerHa;
+            const extN = (2.6 * yieldHaVal).toFixed(1);
+            const extP = (1.4 * yieldHaVal).toFixed(1);
+            const extK = (4.8 * yieldHaVal).toFixed(1);
+            const extCa = (0.35 * yieldHaVal).toFixed(1);
+            const extMg = (0.4 * yieldHaVal).toFixed(1);
+            const extB = (5.0 * yieldHaVal).toFixed(0);
+            const extZn = (6.0 * yieldHaVal).toFixed(0);
+
+            document.getElementById('summary-npk').innerHTML = `N: ${extN}kg • P₂O₅: ${extP}kg • K₂O: ${extK}kg<br><span style="font-size: 1.05rem; color: var(--text-muted); font-weight: 500;">B: ${extB}g • Zn: ${extZn}g (por Ha)</span>`;
+
+            // Renderizar gráfico de barras SVG
+            renderNutrientChart(extN, extP, extK, extCa, extMg);
+        }
+
+        function renderNutrientChart(n, p, k, ca, mg) {
+            const container = document.getElementById('nutrient-chart');
+            const data = [
+                { name: 'N', val: parseFloat(n), color: '#40916c' },
+                { name: 'P₂O₅', val: parseFloat(p), color: '#a3b899' },
+                { name: 'K₂O', val: parseFloat(k), color: '#2d6a4f' },
+                { name: 'CaO', val: parseFloat(ca), color: '#70e000' },
+                { name: 'MgO', val: parseFloat(mg), color: '#1b4332' }
+            ];
+
+            const maxVal = Math.max(...data.map(d => d.val), 10);
+            
+            let htmlContent = '';
+            const chartWidth = 400;
+            const chartHeight = 220;
+            const paddingLeft = 50;
+            const paddingRight = 20;
+            const paddingTop = 20;
+            const paddingBottom = 40;
+            const plotWidth = chartWidth - paddingLeft - paddingRight;
+            const plotHeight = chartHeight - paddingTop - paddingBottom;
+
+            // Eje Y (Gridlines)
+            const steps = 4;
+            for (let i = 0; i <= steps; i++) {
+                const yVal = (maxVal / steps) * i;
+                const yPos = chartHeight - paddingBottom - (plotHeight / steps) * i;
+                htmlContent += `
+                    <line x1="${paddingLeft}" y1="${yPos}" x2="${chartWidth - paddingRight}" y2="${yPos}" stroke="var(--border)" stroke-dasharray="4" stroke-width="1"/>
+                    <text x="${paddingLeft - 8}" y="${yPos + 4}" font-size="10" fill="var(--text-muted)" text-anchor="end">${yVal.toFixed(0)} kg</text>
+                `;
+            }
+
+            // Dibujar Barras
+            const barWidth = 35;
+            const gap = (plotWidth - (data.length * barWidth)) / (data.length - 1);
+
+            data.forEach((d, idx) => {
+                const xPos = paddingLeft + idx * (barWidth + gap);
+                const barHeight = (d.val / maxVal) * plotHeight;
+                const yPos = chartHeight - paddingBottom - barHeight;
+
+                htmlContent += `
+                    <!-- Barra -->
+                    <rect x="${xPos}" y="${yPos}" width="${barWidth}" height="${barHeight}" fill="${d.color}" rx="4" style="transition: all 0.5s ease;"/>
+                    <!-- Valor encima de la barra -->
+                    <text x="${xPos + barWidth / 2}" y="${yPos - 6}" font-size="11" font-weight="700" fill="var(--primary-dark)" text-anchor="middle">${d.val.toFixed(1)}</text>
+                    <!-- Etiqueta debajo -->
+                    <text x="${xPos + barWidth / 2}" y="${chartHeight - paddingBottom + 20}" font-size="11" font-weight="600" fill="var(--text-main)" text-anchor="middle">${d.name}</text>
+                `;
+            });
+
+            // Eje Base
+            htmlContent += `
+                <line x1="${paddingLeft}" y1="${chartHeight - paddingBottom}" x2="${chartWidth - paddingRight}" y2="${chartHeight - paddingBottom}" stroke="var(--primary-dark)" stroke-width="1.5"/>
+            `;
+
+            container.innerHTML = htmlContent;
+        }
+
+        // Manejo de Tema Dark/Light
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        });
+
+        // Ejecutar primer cálculo al cargar la página
+        recalculateAll();
+    </script>
+</body>
+</html>
